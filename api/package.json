@@ -1,0 +1,12 @@
+{
+  "name": "alpuerta-ia-comercial",
+  "version": "1.0.0",
+  "description": "Backend del agente comercial IA para Alpuerta Premiaciones",
+  "type": "module",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
