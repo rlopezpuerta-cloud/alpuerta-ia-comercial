@@ -89,7 +89,8 @@ Responde de forma natural y amigable.`
         console.log(`🤖 Respuesta IA: ${respuestaIA}`);
         
         // 4. GUARDAR EN SUPABASE
-        await fetch(`${process.env.SUPABASE_URL}/rest/v1/conversaciones`, {
+      const supabaseUrl = process.env.SUPABASE_URL || 'https://rwujdgfgvbolrugrsijb.supabase.co';
+await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
