@@ -89,7 +89,7 @@ Responde de forma natural y amigable.`
         console.log(`🤖 Respuesta IA: ${respuestaIA}`);
         
         // 4. GUARDAR EN SUPABASE
-   const supabaseUrl = 'https://rwujdgfgvbolrugrsijb.supabase.co'; // HARDCODED TEMPORAL
+ const supabaseUrl = 'https://rwujdgfgvbolrugrsjib.supabase.co';
    console.log('🔍 SUPABASE URL:', supabaseUrl);
 await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
           method: 'POST',
