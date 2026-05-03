@@ -93,3 +93,4 @@ alpuerta-ia-comercial/
 ---
 
 **Nota de seguridad:** Nunca commitear credenciales reales. Usar solo `.env.example` como plantilla.
+
