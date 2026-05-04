@@ -1,59 +1,8 @@
 // Webhook para WhatsApp - Alpuerta IA Comercial
+// v2.0 — Responses API + switch encendido/apagado
 import fetch from 'node-fetch';
 
-export default async function handler(req, res) {
-  // 1. VERIFICACIÓN DEL WEBHOOK (GET)
-  if (req.method === 'GET') {
-    const mode = req.query['hub.mode'];
-    const token = req.query['hub.verify_token'];
-    const challenge = req.query['hub.challenge'];
-    
-    if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
-      console.log('✅ Webhook verificado correctamente');
-      return res.status(200).send(challenge);
-    }
-    
-    console.log('❌ Verificación fallida');
-    return res.status(403).send('Forbidden');
-  }
-  
-  // 2. RECEPCIÓN DE MENSAJES (POST)
-  if (req.method === 'POST') {
-    const body = req.body;
-    
-    try {
-      // Verificar que es un mensaje de WhatsApp
-      if (body.object === 'whatsapp_business_account') {
-        const entry = body.entry?.[0];
-        const changes = entry?.changes?.[0];
-        const value = changes?.value;
-        
-        // Extraer datos del mensaje
-        const messages = value?.messages;
-        if (!messages || messages.length === 0) {
-          return res.status(200).send('EVENT_RECEIVED');
-        }
-        
-        const message = messages[0];
-        const from = message.from; // Número del cliente
-        const messageBody = message.text?.body || ''; // Texto del mensaje
-        const messageId = message.id;
-        
-        console.log(`📩 Mensaje recibido de ${from}: ${messageBody}`);
-        
-        // 3. CONSULTAR OPENAI
-        const gptResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4',
-            messages: [
-              {
-                role: 'system',
-content: `Eres el asesor de pre-ventas de Alpuerta Premiaciones. Tu misión es calificar prospectos, entender su necesidad, generar interés y preparar leads para que un asesor humano cierre la venta. Debes posicionar a Alpuerta como una opción premium en premiaciones, enfocada en calidad, impacto, personalización y diferenciación. No eres un cotizador. No das precios ni cotizaciones bajo ninguna circunstancia. Si el cliente pide precio, respondes de forma estratégica, explicando que primero se necesitan algunos detalles del evento para proponer algo que realmente valga la pena. Mantén la conversación orientada a que el cliente solicite una propuesta formal con un asesor humano.
+const SYSTEM_PROMPT = `Eres el asesor de pre-ventas de Alpuerta Premiaciones. Tu misión es calificar prospectos, entender su necesidad, generar interés y preparar leads para que un asesor humano cierre la venta. Debes posicionar a Alpuerta como una opción premium en premiaciones, enfocada en calidad, impacto, personalización y diferenciación. No eres un cotizador. No das precios ni cotizaciones bajo ninguna circunstancia. Si el cliente pide precio, respondes de forma estratégica, explicando que primero se necesitan algunos detalles del evento para proponer algo que realmente valga la pena. Mantén la conversación orientada a que el cliente solicite una propuesta formal con un asesor humano.
 
 Alpuerta Premiaciones es una empresa mexicana especializada en el diseño y fabricación de trofeos, medallas y reconocimientos 100% personalizados de alto impacto, con más de 15 años de experiencia creando piezas que no solo premian, sino que cuentan historias de triunfo. No vende productos genéricos; crea símbolos de logro que elevan la percepción de cualquier evento.
 
@@ -77,27 +26,106 @@ Debes detectar si el cliente es serio o frío. Si notas interés real y datos co
 
 Tu objetivo final es llevar la conversación a una transición natural con un asesor humano: "Con lo que me compartes, podemos armarte algo muy bien pensado 🙌 Si quieres, te paso con un asesor para que te prepare una propuesta a la medida."
 
-Evita inventar datos de catálogo, tiempos de entrega, políticas o especificaciones no proporcionadas. El resultado esperado es filtrar mejor clientes, ahorrar tiempo al equipo comercial y dejar conversaciones listas para cerrar.`
-              },
-              {
-                role: 'user',
-                content: messageBody
-              }
-            ],
-            temperature: 0.7,
-            max_tokens: 500
-          })
+Evita inventar datos de catálogo, tiempos de entrega, políticas o especificaciones no proporcionadas. El resultado esperado es filtrar mejor clientes, ahorrar tiempo al equipo comercial y dejar conversaciones listas para cerrar.`;
+
+export default async function handler(req, res) {
+  // 1. VERIFICACIÓN DEL WEBHOOK (GET)
+  if (req.method === 'GET') {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
+      console.log('✅ Webhook verificado correctamente');
+      return res.status(200).send(challenge);
+    }
+
+    console.log('❌ Verificación fallida');
+    return res.status(403).send('Forbidden');
+  }
+
+  // 2. RECEPCIÓN DE MENSAJES (POST)
+  if (req.method === 'POST') {
+    const body = req.body;
+
+    try {
+      if (body.object === 'whatsapp_business_account') {
+        const entry = body.entry?.[0];
+        const changes = entry?.changes?.[0];
+        const value = changes?.value;
+        const messages = value?.messages;
+
+        if (!messages || messages.length === 0) {
+          return res.status(200).send('EVENT_RECEIVED');
+        }
+
+        const message = messages[0];
+        const from = message.from;
+        const messageBody = message.text?.body || '';
+
+        console.log(`📩 Mensaje recibido de ${from}: ${messageBody}`);
+
+        // 3. SWITCH ENCENDIDO/APAGADO
+        const agenteActivo = process.env.AGENTE_ACTIVO !== 'false';
+
+        if (!agenteActivo) {
+          console.log('⏸️ Agente desactivado. Mensaje recibido pero no procesado.');
+          return res.status(200).send('EVENT_RECEIVED');
+        }
+
+        // 4. OBTENER previous_response_id DE SUPABASE (memoria por cliente)
+        const supabaseUrl = 'https://rwujdgfgvbolrugrsjib.supabase.co';
+        let previousResponseId = null;
+
+        const historialRes = await fetch(
+          `${supabaseUrl}/rest/v1/conversaciones?telefono=eq.${from}&order=created_at.desc&limit=1&select=openai_response_id`,
+          {
+            headers: {
+              'apikey': process.env.SUPABASE_SERVICE_KEY,
+              'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
+            }
+          }
+        );
+
+        const historial = await historialRes.json();
+        if (historial.length > 0 && historial[0].openai_response_id) {
+          previousResponseId = historial[0].openai_response_id;
+          console.log(`🧠 Memoria activa para ${from}: ${previousResponseId}`);
+        }
+
+        // 5. LLAMAR A RESPONSES API DE OPENAI
+        const openaiPayload = {
+          model: 'gpt-4o',
+          instructions: SYSTEM_PROMPT,
+          input: messageBody,
+          store: true,
+          max_output_tokens: 500,
+          temperature: 0.7
+        };
+
+        if (previousResponseId) {
+          openaiPayload.previous_response_id = previousResponseId;
+        }
+
+        const openaiRes = await fetch('https://api.openai.com/v1/responses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+          },
+          body: JSON.stringify(openaiPayload)
         });
-        
-        const gptData = await gptResponse.json();
-        const respuestaIA = gptData.choices?.[0]?.message?.content || 'Disculpa, no pude procesar tu mensaje. ¿Podrías repetirlo?';
-        
+
+        const openaiData = await openaiRes.json();
+        const respuestaIA = openaiData.output?.[0]?.content?.[0]?.text
+          || 'Disculpa, no pude procesar tu mensaje. ¿Podrías repetirlo?';
+        const newResponseId = openaiData.id;
+
         console.log(`🤖 Respuesta IA: ${respuestaIA}`);
-        
-        // 4. GUARDAR EN SUPABASE
- const supabaseUrl = 'https://rwujdgfgvbolrugrsjib.supabase.co';
-   console.log('🔍 SUPABASE URL:', supabaseUrl);
-await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
+        console.log(`🔑 Response ID: ${newResponseId}`);
+
+        // 6. GUARDAR EN SUPABASE (incluye openai_response_id para memoria)
+        await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -108,13 +136,14 @@ await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
             telefono: from,
             canal: 'whatsapp',
             mensaje_cliente: messageBody,
-            respuesta_ia: respuestaIA
+            respuesta_ia: respuestaIA,
+            openai_response_id: newResponseId
           })
         });
-        
+
         console.log('💾 Conversación guardada en Supabase');
-        
-        // 5. RESPONDER AL CLIENTE VÍA WHATSAPP
+
+        // 7. RESPONDER AL CLIENTE VÍA WHATSAPP
         await fetch(`https://graph.facebook.com/v25.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
           method: 'POST',
           headers: {
@@ -124,22 +153,20 @@ await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
           body: JSON.stringify({
             messaging_product: 'whatsapp',
             to: from,
-            text: {
-              body: respuestaIA
-            }
+            text: { body: respuestaIA }
           })
         });
-        
+
         console.log(`✅ Respuesta enviada a ${from}`);
       }
-      
+
       return res.status(200).send('EVENT_RECEIVED');
-      
+
     } catch (error) {
       console.error('❌ Error procesando mensaje:', error);
       return res.status(500).send('Internal Server Error');
     }
   }
-  
+
   return res.status(404).send('Not Found');
 }
