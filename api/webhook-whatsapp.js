@@ -1,5 +1,5 @@
-// Webhook para WhatsApp - Alpuerta IA Comercial
-// v2.1 — Responses API + switch + token Meta
+// Webhook Multicanal - Alpuerta IA Comercial
+// v3.0 — WhatsApp + Messenger + Instagram + Responses API + memoria + switch
 import fetch from 'node-fetch';
 
 const SYSTEM_PROMPT = `Eres el asesor de pre-ventas de Alpuerta Premiaciones. Tu misión es calificar prospectos, entender su necesidad, generar interés y preparar leads para que un asesor humano cierre la venta. Debes posicionar a Alpuerta como una opción premium en premiaciones, enfocada en calidad, impacto, personalización y diferenciación. No eres un cotizador. No das precios ni cotizaciones bajo ninguna circunstancia. Si el cliente pide precio, respondes de forma estratégica, explicando que primero se necesitan algunos detalles del evento para proponer algo que realmente valga la pena. Mantén la conversación orientada a que el cliente solicite una propuesta formal con un asesor humano.
@@ -28,139 +28,217 @@ Tu objetivo final es llevar la conversación a una transición natural con un as
 
 Evita inventar datos de catálogo, tiempos de entrega, políticas o especificaciones no proporcionadas. El resultado esperado es filtrar mejor clientes, ahorrar tiempo al equipo comercial y dejar conversaciones listas para cerrar.`;
 
+const supabaseUrl = 'https://rwujdgfgvbolrugrsjib.supabase.co';
+
+// ========== FUNCIÓN: OBTENER MEMORIA DE CONVERSACIÓN ==========
+async function obtenerMemoria(userId) {
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/conversaciones?telefono=eq.${userId}&order=created_at.desc&limit=1&select=openai_response_id`,
+      {
+        headers: {
+          'apikey': process.env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
+        }
+      }
+    );
+    const data = await res.json();
+    if (data.length > 0 && data[0].openai_response_id) {
+      return data[0].openai_response_id;
+    }
+    return null;
+  } catch (e) {
+    console.error('Error obteniendo memoria:', e);
+    return null;
+  }
+}
+
+// ========== FUNCIÓN: LLAMAR A OPENAI ==========
+async function llamarOpenAI(messageBody, previousResponseId) {
+  const payload = {
+    model: 'gpt-4o',
+    instructions: SYSTEM_PROMPT,
+    input: messageBody,
+    store: true,
+    max_output_tokens: 500,
+    temperature: 0.7
+  };
+
+  if (previousResponseId) {
+    payload.previous_response_id = previousResponseId;
+  }
+
+  const res = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+  return {
+    text: data.output?.[0]?.content?.[0]?.text || 'Disculpa, no pude procesar tu mensaje. ¿Podrías repetirlo?',
+    responseId: data.id
+  };
+}
+
+// ========== FUNCIÓN: GUARDAR EN SUPABASE ==========
+async function guardarConversacion(userId, canal, mensajeCliente, respuestaIA, responseId) {
+  await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': process.env.SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
+    },
+    body: JSON.stringify({
+      telefono: userId,
+      canal: canal,
+      mensaje_cliente: mensajeCliente,
+      respuesta_ia: respuestaIA,
+      openai_response_id: responseId
+    })
+  });
+}
+
+// ========== FUNCIÓN: ENVIAR MENSAJE A WHATSAPP ==========
+async function enviarWhatsApp(to, text) {
+  await fetch(`https://graph.facebook.com/v25.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.META_ACCESS_TOKEN}`
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to: to,
+      text: { body: text }
+    })
+  });
+}
+
+// ========== FUNCIÓN: ENVIAR MENSAJE A MESSENGER ==========
+async function enviarMessenger(recipientId, text) {
+  await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recipient: { id: recipientId },
+      message: { text: text }
+    })
+  });
+}
+
+// ========== FUNCIÓN: ENVIAR MENSAJE A INSTAGRAM ==========
+async function enviarInstagram(recipientId, text) {
+  await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recipient: { id: recipientId },
+      message: { text: text }
+    })
+  });
+}
+
+// ========== FUNCIÓN: PROCESAR MENSAJE ==========
+async function procesarMensaje(userId, canal, mensajeCliente) {
+  console.log(`📩 [${canal}] Mensaje de ${userId}: ${mensajeCliente}`);
+
+  const previousResponseId = await obtenerMemoria(userId);
+  if (previousResponseId) {
+    console.log(`🧠 Memoria activa: ${previousResponseId}`);
+  }
+
+  const { text: respuestaIA, responseId } = await llamarOpenAI(mensajeCliente, previousResponseId);
+  console.log(`🤖 Respuesta IA: ${respuestaIA}`);
+
+  await guardarConversacion(userId, canal, mensajeCliente, respuestaIA, responseId);
+  console.log('💾 Conversación guardada');
+
+  if (canal === 'whatsapp') {
+    await enviarWhatsApp(userId, respuestaIA);
+  } else if (canal === 'messenger') {
+    await enviarMessenger(userId, respuestaIA);
+  } else if (canal === 'instagram') {
+    await enviarInstagram(userId, respuestaIA);
+  }
+
+  console.log(`✅ Respuesta enviada por ${canal} a ${userId}`);
+}
+
+// ========== HANDLER PRINCIPAL ==========
 export default async function handler(req, res) {
-  // 1. VERIFICACIÓN DEL WEBHOOK (GET)
+  // VERIFICACIÓN DEL WEBHOOK (GET)
   if (req.method === 'GET') {
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
 
-console.log(`🔍 Token recibido: ${token}`);
-console.log(`🔍 Token esperado: ${process.env.VERIFY_TOKEN}`);
+    if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
+      console.log('✅ Webhook verificado correctamente');
+      return res.status(200).send(challenge);
+    }
 
-if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
-  console.log('✅ Webhook verificado correctamente');
-  return res.status(200).send(challenge);
-}
-
-console.log('❌ Verificación fallida');
-return res.status(403).send('Forbidden');
+    console.log('❌ Verificación fallida');
+    return res.status(403).send('Forbidden');
   }
 
-  // 2. RECEPCIÓN DE MENSAJES (POST)
+  // RECEPCIÓN DE MENSAJES (POST)
   if (req.method === 'POST') {
     const body = req.body;
 
     try {
+      // SWITCH GLOBAL ENCENDIDO/APAGADO
+      const agenteActivo = process.env.AGENTE_ACTIVO !== 'false';
+      if (!agenteActivo) {
+        console.log('⏸️ Agente desactivado.');
+        return res.status(200).send('EVENT_RECEIVED');
+      }
+
+      // ===== WHATSAPP =====
       if (body.object === 'whatsapp_business_account') {
-        const entry = body.entry?.[0];
-        const changes = entry?.changes?.[0];
-        const value = changes?.value;
-        const messages = value?.messages;
-
-        if (!messages || messages.length === 0) {
-          return res.status(200).send('EVENT_RECEIVED');
+        const messages = body.entry?.[0]?.changes?.[0]?.value?.messages;
+        if (messages && messages.length > 0) {
+          const message = messages[0];
+          const from = message.from;
+          const messageBody = message.text?.body || '';
+          if (messageBody) {
+            await procesarMensaje(from, 'whatsapp', messageBody);
+          }
         }
+      }
 
-        const message = messages[0];
-        const from = message.from;
-        const messageBody = message.text?.body || '';
-
-        console.log(`📩 Mensaje recibido de ${from}: ${messageBody}`);
-
-        // 3. SWITCH ENCENDIDO/APAGADO
-        const agenteActivo = process.env.AGENTE_ACTIVO !== 'false';
-
-        if (!agenteActivo) {
-          console.log('⏸️ Agente desactivado. Mensaje recibido pero no procesado.');
-          return res.status(200).send('EVENT_RECEIVED');
-        }
-
-        // 4. OBTENER previous_response_id DE SUPABASE (memoria por cliente)
-        const supabaseUrl = 'https://rwujdgfgvbolrugrsjib.supabase.co';
-        let previousResponseId = null;
-
-        const historialRes = await fetch(
-          `${supabaseUrl}/rest/v1/conversaciones?telefono=eq.${from}&order=created_at.desc&limit=1&select=openai_response_id`,
-          {
-            headers: {
-              'apikey': process.env.SUPABASE_SERVICE_KEY,
-              'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
+      // ===== MESSENGER (Página de Facebook) =====
+      else if (body.object === 'page') {
+        const entries = body.entry || [];
+        for (const entry of entries) {
+          const messaging = entry.messaging || [];
+          for (const event of messaging) {
+            if (event.message && event.message.text && !event.message.is_echo) {
+              const senderId = event.sender.id;
+              const text = event.message.text;
+              await procesarMensaje(senderId, 'messenger', text);
             }
           }
-        );
-
-        const historial = await historialRes.json();
-        if (historial.length > 0 && historial[0].openai_response_id) {
-          previousResponseId = historial[0].openai_response_id;
-          console.log(`🧠 Memoria activa para ${from}: ${previousResponseId}`);
         }
+      }
 
-        // 5. LLAMAR A RESPONSES API DE OPENAI
-        const openaiPayload = {
-          model: 'gpt-4o',
-          instructions: SYSTEM_PROMPT,
-          input: messageBody,
-          store: true,
-          max_output_tokens: 500,
-          temperature: 0.7
-        };
-
-        if (previousResponseId) {
-          openaiPayload.previous_response_id = previousResponseId;
+      // ===== INSTAGRAM =====
+      else if (body.object === 'instagram') {
+        const entries = body.entry || [];
+        for (const entry of entries) {
+          const messaging = entry.messaging || [];
+          for (const event of messaging) {
+            if (event.message && event.message.text && !event.message.is_echo) {
+              const senderId = event.sender.id;
+              const text = event.message.text;
+              await procesarMensaje(senderId, 'instagram', text);
+            }
+          }
         }
-
-        const openaiRes = await fetch('https://api.openai.com/v1/responses', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-          },
-          body: JSON.stringify(openaiPayload)
-        });
-
-        const openaiData = await openaiRes.json();
-        const respuestaIA = openaiData.output?.[0]?.content?.[0]?.text
-          || 'Disculpa, no pude procesar tu mensaje. ¿Podrías repetirlo?';
-        const newResponseId = openaiData.id;
-
-        console.log(`🤖 Respuesta IA: ${respuestaIA}`);
-        console.log(`🔑 Response ID: ${newResponseId}`);
-
-        // 6. GUARDAR EN SUPABASE
-        await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': process.env.SUPABASE_SERVICE_KEY,
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
-          },
-          body: JSON.stringify({
-            telefono: from,
-            canal: 'whatsapp',
-            mensaje_cliente: messageBody,
-            respuesta_ia: respuestaIA,
-            openai_response_id: newResponseId
-          })
-        });
-
-        console.log('💾 Conversación guardada en Supabase');
-
-        // 7. RESPONDER AL CLIENTE VÍA WHATSAPP
-        await fetch(`https://graph.facebook.com/v25.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.META_ACCESS_TOKEN}`
-          },
-          body: JSON.stringify({
-            messaging_product: 'whatsapp',
-            to: from,
-            text: { body: respuestaIA }
-          })
-        });
-
-        console.log(`✅ Respuesta enviada a ${from}`);
       }
 
       return res.status(200).send('EVENT_RECEIVED');
