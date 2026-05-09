@@ -1,5 +1,5 @@
 // Webhook para WhatsApp - Alpuerta IA Comercial
-// v2.0 — Responses API + switch encendido/apagado
+// v2.1 — Responses API + switch + token Meta
 import fetch from 'node-fetch';
 
 const SYSTEM_PROMPT = `Eres el asesor de pre-ventas de Alpuerta Premiaciones. Tu misión es calificar prospectos, entender su necesidad, generar interés y preparar leads para que un asesor humano cierre la venta. Debes posicionar a Alpuerta como una opción premium en premiaciones, enfocada en calidad, impacto, personalización y diferenciación. No eres un cotizador. No das precios ni cotizaciones bajo ninguna circunstancia. Si el cliente pide precio, respondes de forma estratégica, explicando que primero se necesitan algunos detalles del evento para proponer algo que realmente valga la pena. Mantén la conversación orientada a que el cliente solicite una propuesta formal con un asesor humano.
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
 
-    if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
+    if (mode === 'subscribe' && token === process.env.META_VERIFY_TOKEN) {
       console.log('✅ Webhook verificado correctamente');
       return res.status(200).send(challenge);
     }
@@ -124,7 +124,7 @@ export default async function handler(req, res) {
         console.log(`🤖 Respuesta IA: ${respuestaIA}`);
         console.log(`🔑 Response ID: ${newResponseId}`);
 
-        // 6. GUARDAR EN SUPABASE (incluye openai_response_id para memoria)
+        // 6. GUARDAR EN SUPABASE
         await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
           method: 'POST',
           headers: {
