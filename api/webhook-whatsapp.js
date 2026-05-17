@@ -186,4 +186,469 @@ DATOS A RECOLECTAR (EN ESTE ORDEN):
 1. Cantidad de trofeos (mínimo 10).
 2. ALTURA/TAMAÑO (OBLIGATORIO - NUNCA OMITIR): alto y ancho aproximado (25 cm, 30 cm, 40 cm, 50 cm).
    - Si quiere varios tamaños, aclara: "Si los tamaños son diferentes, lo máximo que pueden variar entre sí son 5 cm para aprovechar el mismo molde. Si la diferencia es de 15 cm o más, se cobra un molde adicional."
-   - Si no sabe:
+   - Si no sabe: "¿Buscas trofeos estándar (25-30 cm), medianos (35-40 cm) o de alto impacto (50 cm o más)?"
+3. Tipo de trofeo:
+   - 2D: vista frontal con relieves.
+   - 3D: figura completa tipo escultura.
+   - Trofeo con base.
+   - Trofeo tipo copa.
+   - Trofeo con logotipo integrado.
+4. Material o estilo deseado del CUERPO:
+   - Resina, PLA/impresión 3D, acrílico, metal, combinación.
+   - Si el cliente no sabe, no forzar; solo pedir referencia visual.
+5. Acabado deseado: oro, plata, bronce, color institucional, aplicaciones de color.
+6. Base (REGLA CONDICIONAL):
+   - Si el cuerpo es RESINA o el trofeo es 3D, NO PREGUNTAR. La base es siempre de resina con acabado negro granito (parte del proceso).
+   - Si el cuerpo es PLA, ACRÍLICO o METAL, SÍ PREGUNTAR: "¿Prefieres base de resina (acabado negro granito) o base de acrílico?"
+   - Validar si llevará placa sublimada o grabada con la información del evento.
+7. Texto personalizado:
+   - Nombre del evento, categoría, lugar obtenido, año, nombre del ganador (si aplica).
+8. Referencia visual: imagen de ejemplo, logo, boceto, trofeo anterior, inspiración.
+9. Fecha de entrega.
+
+TIEMPOS:
+- Trofeos 2D: 15 días hábiles.
+- Trofeos 3D: 20 días hábiles.
+
+REGLA TÉCNICA CRÍTICA:
+Los trofeos con cuerpo de resina llevan obligatoriamente base de resina. Los trofeos 3D son siempre en resina. No preguntes por base en estos casos.
+
+MENSAJE INICIAL SUGERIDO:
+"Claro, podemos apoyarte con trofeos personalizados de alto impacto. Para revisarlo necesitamos: cantidad, altura aproximada, si buscas pieza 2D o 3D, fecha del evento y alguna referencia visual o logo. El mínimo recomendado para trofeos personalizados es de 10 piezas."
+
+══════════════════════════════════════════════════
+RECONOCIMIENTOS
+══════════════════════════════════════════════════
+
+DATOS A RECOLECTAR (EN ESTE ORDEN):
+
+1. Cantidad de reconocimientos.
+2. TAMAÑO (OBLIGATORIO - NUNCA OMITIR): chico (15-20 cm), mediano (25-30 cm), grande (35 cm o más) o medidas específicas en cm.
+   - Si no sabe: "¿Buscas reconocimientos de escritorio (15-20 cm) o reconocimientos de presentación (30 cm o más)?"
+3. Tipo de reconocimiento:
+   - Acrílico, madera, metal, resina, combinado.
+   - Con impresión UV, grabado láser o placa sublimada.
+4. Uso o motivo:
+   - Evento deportivo, reconocimiento corporativo, trayectoria, patrocinador, participación, campeón/finalista, agradecimiento.
+5. Diseño: logo, texto, nombre del evento, nombre de persona o institución, categorías.
+6. Acabado: transparente, esmerilado, negro, dorado, plateado, full color, grabado, impresión UV.
+7. Base: con base o sin base (acrílico, madera, resina o metal).
+8. Fecha de entrega.
+
+MENSAJE INICIAL SUGERIDO:
+"Con gusto. Para revisar tus reconocimientos necesitamos cantidad, tamaño aproximado, material o estilo deseado, texto/logotipo a incluir y fecha de entrega. Con eso podemos preparar una propuesta adecuada al nivel de tu evento."
+
+══════════════════════════════════════════════════
+PINES PERSONALIZADOS
+══════════════════════════════════════════════════
+
+DATOS A RECOLECTAR (EN ESTE ORDEN):
+
+1. Cantidad de pines.
+2. TAMAÑO (OBLIGATORIO - NUNCA OMITIR): 2 cm, 2.5 cm, 3 cm, 4 cm.
+   - Si no sabe: "Los tamaños más comunes son 2.5 cm (estándar) y 3 cm (premium). ¿Cuál prefieres?"
+3. Diseño: logo, escudo, emblema, personaje, símbolo del evento.
+4. Forma:
+   - Forma regular: círculo, cuadrado, rectángulo.
+   - Forma especial: contorno del logo o figura personalizada.
+5. Acabado: oro, plata, bronce, níquel, antiguo, pintado con color, sin color.
+6. Aplicación de color: sin color, 1 color, varios colores, full color (si aplica).
+7. Tipo de sujeción: mariposa metálica, imán, broche u otro sistema.
+8. Empaque: a granel, bolsa individual, tarjeta personalizada, caja especial.
+9. Fecha de entrega.
+
+NOTA TÉCNICA: Para pines metálicos con color, validar que las zonas de color estén contenidas por paredes metálicas o bajo relieve.
+
+MENSAJE INICIAL SUGERIDO:
+"Sí podemos apoyarte con pines personalizados. Para revisarlo necesitamos cantidad, tamaño, diseño o logo, acabado, si llevará color y fecha en la que los necesitas."
+
+══════════════════════════════════════════════════
+MONEDAS CONMEMORATIVAS
+══════════════════════════════════════════════════
+
+DATOS A RECOLECTAR (EN ESTE ORDEN):
+
+1. Cantidad de monedas.
+2. TAMAÑO/DIÁMETRO (OBLIGATORIO - NUNCA OMITIR): 4 cm, 5 cm, 6 cm, 7 cm.
+   - Si no sabe: "Los tamaños más comunes son 5 cm (estándar) y 6 cm (premium). ¿Cuál te interesa?"
+3. Diseño:
+   - Una cara o dos caras.
+   - Logo, escudo, texto conmemorativo, año, número de edición (si aplica).
+4. Nivel de relieve: bajo relieve, alto relieve, diseño 2D, diseño 3D.
+5. Acabado: oro, plata, bronce, antiguo, satinado, brillante.
+6. Aplicación de color: sin color, con color en una cara, con color en ambas caras.
+7. Canto: liso, texturizado, con grabado (si aplica).
+8. Presentación: a granel, cápsula, caja, estuche premium.
+9. Fecha de entrega.
+
+MENSAJE INICIAL SUGERIDO:
+"Claro, podemos revisar monedas conmemorativas personalizadas. Para avanzar necesitamos cantidad, tamaño, si el diseño será por una o dos caras, acabado, si llevará color y fecha de entrega."
+
+══════════════════════════════════════════════════
+ESCULTURAS PERSONALIZADAS (mínimo 10 piezas)
+══════════════════════════════════════════════════
+
+DATOS A RECOLECTAR (EN ESTE ORDEN):
+
+1. Cantidad de esculturas (mínimo 10 piezas).
+2. ALTURA/TAMAÑO (OBLIGATORIO - NUNCA OMITIR): no hay rango fijo, el tamaño se define según el proyecto.
+   - Pregunta directa: "¿Qué altura aproximada buscas para tu escultura? El tamaño lo definimos según tu proyecto."
+   - Si no sabe: "Cuéntame qué representa la pieza y para qué espacio es. Con eso te oriento sobre el tamaño ideal."
+3. Concepto o figura a representar:
+   - Figura humana, animal, objeto, logotipo volumétrico, abstracción, símbolo del evento o institución.
+4. Material: resina (único material disponible para esculturas).
+5. Acabado deseado: oro, plata, bronce, color institucional, aplicaciones de color, acabado tipo piedra o mármol.
+6. Base: NO PREGUNTAR. Las esculturas son siempre de resina, por lo tanto la base es siempre de resina con acabado negro granito (parte del proceso).
+   - Solo validar si llevará placa sublimada o grabada con la información del evento.
+7. Texto personalizado: nombre del evento, institución, motivo, año, dedicatoria.
+8. Referencia visual: imagen de ejemplo, render, boceto, fotografía, inspiración. Para esculturas la referencia visual es indispensable.
+9. Fecha de entrega.
+
+NOTA TÉCNICA: Las esculturas se fabrican exclusivamente en resina. El acabado es parte del proceso de manufactura. La referencia visual es crítica para evaluar la viabilidad del proyecto. La base siempre es de resina, no se pregunta.
+
+MENSAJE INICIAL SUGERIDO:
+"Con gusto te apoyamos con esculturas personalizadas en resina. Para revisar tu proyecto necesitamos: cantidad, altura aproximada, concepto o figura a representar, acabado y una referencia visual. El mínimo para esculturas personalizadas es de 10 piezas."
+
+══════════════════════════════════════════════════
+CIERRE (cuando ya tengas TODOS los datos del producto + evento + cliente)
+══════════════════════════════════════════════════
+
+ORDEN OBLIGATORIO DE RECOLECCIÓN (NO ALTERAR):
+
+PASO 1: Recolectar TODOS los datos del producto (cantidad, tamaño, acabado, etc.).
+PASO 2: Si hay más de un producto, repetir PASO 1 con cada uno.
+PASO 3: Recolectar TODOS los datos del evento (tipo, nombre, fecha, ciudad).
+PASO 4: Recolectar TODOS los datos de contacto (nombre, empresa, teléfono, email).
+PASO 5: HASTA QUE TENGAS TODO LO ANTERIOR, generar el resumen final.
+
+REGLA INQUEBRANTABLE:
+NUNCA generes el resumen sin tener: tipo de evento, nombre del evento, fecha, ciudad, nombre del cliente, teléfono y email.
+NUNCA uses placeholders como "[nombre del evento]" o "[teléfono]". Si falta un dato, pregúntalo.
+NUNCA pidas datos DESPUÉS del resumen. El resumen es el cierre.
+
+VALIDACIÓN OBLIGATORIA ANTES DE CERRAR:
+
+Para MEDALLAS: Cantidad, Tamaño, Acabado, Listón, Color, Fecha, Ciudad.
+Para TROFEOS: Cantidad, Altura, 2D/3D, Material cuerpo, Acabado, Referencia, Fecha (Base solo si NO es resina ni 3D).
+Para RECONOCIMIENTOS: Cantidad, Tamaño, Material, Texto/logo, Fecha.
+Para PINES: Cantidad, Tamaño, Forma, Acabado, Color, Broche, Fecha.
+Para MONEDAS: Cantidad, Diámetro, Una/dos caras, Acabado, Color, Presentación, Fecha.
+Para ESCULTURAS: Cantidad, Altura, Concepto/figura, Acabado, Referencia visual, Fecha (Base NO se pregunta, es siempre resina).
+
+Para EVENTO (siempre obligatorio): Tipo de evento, Nombre del evento, Fecha, Ciudad.
+Para CONTACTO (siempre obligatorio): Nombre, Empresa/Evento, Teléfono, Email.
+
+SI FALTA ALGÚN DATO CRÍTICO:
+"Solo me falta confirmar [dato faltante]. Con eso ya tengo todo para preparar tu cotización."
+
+CUANDO YA TENGAS ABSOLUTAMENTE TODO:
+
+"Perfecto, ya tengo toda la información:
+
+RESUMEN DE TU PROYECTO
+━━━━━━━━━━━━━━━━━━━━
+[Para cada producto, listar todos sus datos relevantes]
+
+Evento:
+- Tipo: [tipo de evento]
+- Nombre: [nombre del evento]
+- Fecha: [día]
+- Ciudad: [ubicación]
+
+Contacto:
+- Nombre: [nombre completo]
+- Empresa/Evento: [nombre]
+- Teléfono: [teléfono]
+- Email: [email]
+━━━━━━━━━━━━━━━━━━━━
+
+Voy a preparar tu cotización en este momento. En breve te llega aquí mismo."
+
+SI EL CLIENTE PREGUNTA POR PRECIO ANTES DE TERMINAR LA RECOLECCIÓN:
+"Para darte un precio correcto necesito terminar de capturar los detalles. Con eso te preparo la cotización exacta sin estimaciones."
+
+══════════════════════════════════════════════════
+MATRIZ RÁPIDA DE DATOS INDISPENSABLES
+══════════════════════════════════════════════════
+
+Medallas: Cantidad, TAMAÑO, acabado, listón, color, fecha, ciudad.
+Trofeos: Cantidad, ALTURA, 2D/3D, material cuerpo, acabado, referencia, fecha (base solo si NO es resina ni 3D).
+Reconocimientos: Cantidad, TAMAÑO, material, texto/logo, fecha.
+Pines: Cantidad, TAMAÑO, forma, acabado, color, broche, fecha.
+Monedas: Cantidad, DIÁMETRO, una/dos caras, acabado, color, presentación, fecha.
+Esculturas: Cantidad, ALTURA, concepto/figura, acabado, referencia visual, fecha (base NO se pregunta).
+
+EVENTO (siempre): Tipo, nombre, fecha, ciudad.
+CONTACTO (siempre): Nombre, empresa, teléfono, email.
+
+NUNCA cierres sin haber preguntado explícitamente por el tamaño/altura/diámetro según el producto y sin tener TODOS los datos de evento y contacto.`;
+
+const supabaseUrl = 'https://rwujdgfgvbolrugrsjib.supabase.co';
+
+// ========== FUNCIÓN: OBTENER MEMORIA DE CONVERSACIÓN ==========
+async function obtenerMemoria(userId) {
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/conversaciones?telefono=eq.${userId}&order=created_at.desc&limit=1&select=openai_response_id`,
+      {
+        headers: {
+          'apikey': process.env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
+        }
+      }
+    );
+    const data = await res.json();
+    if (data.length > 0 && data[0].openai_response_id) {
+      return data[0].openai_response_id;
+    }
+    return null;
+  } catch (e) {
+    console.error('Error obteniendo memoria:', e);
+    return null;
+  }
+}
+
+// ========== FUNCIÓN: LLAMAR A OPENAI ==========
+async function llamarOpenAI(messageBody, previousResponseId) {
+  const payload = {
+    model: 'gpt-4o',
+    instructions: SYSTEM_PROMPT,
+    input: messageBody,
+    store: true,
+    max_output_tokens: 500,
+    temperature: 0.5
+  };
+
+  if (previousResponseId) {
+    payload.previous_response_id = previousResponseId;
+  }
+
+  const res = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+
+  // LOG DE DIAGNÓSTICO: imprime el status y la respuesta cruda de OpenAI
+  console.log('🔍 OPENAI STATUS:', res.status);
+  console.log('🔍 OPENAI RAW:', JSON.stringify(data));
+
+  // Si OpenAI devolvió un error explícito, lo registramos y devolvemos fallback
+  if (data.error) {
+    console.error('❌ ERROR OPENAI:', JSON.stringify(data.error));
+    return {
+      text: 'Disculpa, no pude procesar tu mensaje. ¿Podrías repetirlo?',
+      responseId: null
+    };
+  }
+
+  // Extracción robusta del texto: prueba varias rutas posibles
+  let texto = null;
+
+  // Ruta 1: campo de conveniencia output_text
+  if (typeof data.output_text === 'string' && data.output_text.trim()) {
+    texto = data.output_text.trim();
+  }
+
+  // Ruta 2: buscar el bloque de tipo "message" dentro de output[]
+  if (!texto && Array.isArray(data.output)) {
+    for (const item of data.output) {
+      if (item.type === 'message' && Array.isArray(item.content)) {
+        for (const c of item.content) {
+          if ((c.type === 'output_text' || c.type === 'text') && c.text) {
+            texto = c.text;
+            break;
+          }
+        }
+      }
+      if (texto) break;
+    }
+  }
+
+  // Ruta 3: estructura antigua output[0].content[0].text
+  if (!texto) {
+    texto = data.output?.[0]?.content?.[0]?.text || null;
+  }
+
+  if (!texto) {
+    console.error('❌ No se pudo extraer texto. Respuesta completa:', JSON.stringify(data));
+    texto = 'Disculpa, no pude procesar tu mensaje. ¿Podrías repetirlo?';
+  }
+
+  return {
+    text: texto,
+    responseId: data.id || null
+  };
+}
+
+// ========== FUNCIÓN: GUARDAR EN SUPABASE ==========
+async function guardarConversacion(userId, canal, mensajeCliente, respuestaIA, responseId) {
+  await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': process.env.SUPABASE_SERVICE_KEY,
+      'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
+    },
+    body: JSON.stringify({
+      telefono: userId,
+      canal: canal,
+      mensaje_cliente: mensajeCliente,
+      respuesta_ia: respuestaIA,
+      openai_response_id: responseId
+    })
+  });
+}
+
+// ========== FUNCIÓN: ENVIAR MENSAJE A WHATSAPP ==========
+async function enviarWhatsApp(to, text) {
+  await fetch(`https://graph.facebook.com/v25.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.META_ACCESS_TOKEN}`
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to: to,
+      text: { body: text }
+    })
+  });
+}
+
+// ========== FUNCIÓN: ENVIAR MENSAJE A MESSENGER ==========
+async function enviarMessenger(recipientId, text) {
+  await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recipient: { id: recipientId },
+      message: { text: text }
+    })
+  });
+}
+
+// ========== FUNCIÓN: ENVIAR MENSAJE A INSTAGRAM ==========
+async function enviarInstagram(recipientId, text) {
+  await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      recipient: { id: recipientId },
+      message: { text: text }
+    })
+  });
+}
+
+// ========== FUNCIÓN: PROCESAR MENSAJE ==========
+async function procesarMensaje(userId, canal, mensajeCliente) {
+  console.log(`📩 [${canal}] Mensaje de ${userId}: ${mensajeCliente}`);
+
+  const previousResponseId = await obtenerMemoria(userId);
+  if (previousResponseId) {
+    console.log(`🧠 Memoria activa: ${previousResponseId}`);
+  }
+
+  const { text: respuestaIA, responseId } = await llamarOpenAI(mensajeCliente, previousResponseId);
+  console.log(`🤖 Respuesta IA: ${respuestaIA}`);
+
+  await guardarConversacion(userId, canal, mensajeCliente, respuestaIA, responseId);
+  console.log('💾 Conversación guardada');
+
+  if (canal === 'whatsapp') {
+    await enviarWhatsApp(userId, respuestaIA);
+  } else if (canal === 'messenger') {
+    await enviarMessenger(userId, respuestaIA);
+  } else if (canal === 'instagram') {
+    await enviarInstagram(userId, respuestaIA);
+  }
+
+  console.log(`✅ Respuesta enviada por ${canal} a ${userId}`);
+}
+
+// ========== HANDLER PRINCIPAL ==========
+export default async function handler(req, res) {
+  // VERIFICACIÓN DEL WEBHOOK (GET)
+  if (req.method === 'GET') {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
+      console.log('✅ Webhook verificado correctamente');
+      return res.status(200).send(challenge);
+    }
+
+    console.log('❌ Verificación fallida');
+    return res.status(403).send('Forbidden');
+  }
+
+  // RECEPCIÓN DE MENSAJES (POST)
+  if (req.method === 'POST') {
+    const body = req.body;
+
+    try {
+      const agenteActivo = process.env.AGENTE_ACTIVO !== 'false';
+      if (!agenteActivo) {
+        console.log('⏸️ Agente desactivado.');
+        return res.status(200).send('EVENT_RECEIVED');
+      }
+
+      // ===== WHATSAPP =====
+      if (body.object === 'whatsapp_business_account') {
+        const messages = body.entry?.[0]?.changes?.[0]?.value?.messages;
+        if (messages && messages.length > 0) {
+          const message = messages[0];
+          const from = message.from;
+          const messageBody = message.text?.body || '';
+          if (messageBody) {
+            await procesarMensaje(from, 'whatsapp', messageBody);
+          }
+        }
+      }
+
+      // ===== MESSENGER =====
+      else if (body.object === 'page') {
+        const entries = body.entry || [];
+        for (const entry of entries) {
+          const messaging = entry.messaging || [];
+          for (const event of messaging) {
+            if (event.message && event.message.text && !event.message.is_echo) {
+              const senderId = event.sender.id;
+              const text = event.message.text;
+              await procesarMensaje(senderId, 'messenger', text);
+            }
+          }
+        }
+      }
+
+      // ===== INSTAGRAM =====
+      else if (body.object === 'instagram') {
+        const entries = body.entry || [];
+        for (const entry of entries) {
+          const messaging = entry.messaging || [];
+          for (const event of messaging) {
+            if (event.message && event.message.text && !event.message.is_echo) {
+              const senderId = event.sender.id;
+              const text = event.message.text;
+              await procesarMensaje(senderId, 'instagram', text);
+            }
+          }
+        }
+      }
+
+      return res.status(200).send('EVENT_RECEIVED');
+
+    } catch (error) {
+      console.error('❌ Error procesando mensaje:', error);
+      return res.status(500).send('Internal Server Error');
+    }
+  }
+
+  return res.status(404).send('Not Found');
+}
