@@ -411,7 +411,7 @@ async function obtenerMemoria(userId) {
 // ========== FUNCIÓN: LLAMAR A OPENAI ==========
 async function llamarOpenAI(messageBody, previousResponseId) {
   const payload = {
-    model: 'gpt-4o',
+    model: 'gpt-4o-mini',
     instructions: SYSTEM_PROMPT,
     input: messageBody,
     store: true,
