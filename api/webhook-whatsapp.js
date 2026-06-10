@@ -1,5 +1,5 @@
 // Webhook Multicanal - Alpuerta IA Comercial
-// v4.6 — Extracción robusta de respuesta OpenAI + logs de diagnóstico
+// v4.7 — Captura de atribución (referral de Meta) + extracción robusta OpenAI
 import fetch from 'node-fetch';
 
 const SYSTEM_PROMPT = `Eres el asesor comercial digital de Alpuerta Premiaciones, marca premium de premiaciones personalizadas y de alto impacto.
@@ -545,9 +545,56 @@ async function enviarInstagram(recipientId, text) {
   });
 }
 
+// ========== FUNCIÓN: GUARDAR ATRIBUCIÓN (ORIGEN DEL LEAD) ==========
+// Guarda el origen del lead la PRIMERA vez que escribe. Si viene de un anuncio
+// de Meta (click-to-WhatsApp/Messenger/IG), el objeto referral trae el ID del
+// anuncio. Si no viene referral, se marca como orgánico. UNIQUE(telefono) evita
+// duplicados: solo se registra el primer toque (atribución first-touch).
+async function guardarAtribucion(userId, canal, referral) {
+  try {
+    const tieneAd = referral && (referral.source_id || referral.source_type || referral.ref);
+    const registro = {
+      telefono: userId,
+      canal: canal,
+      origen: tieneAd ? 'ad' : 'organico',
+      source_id: referral?.source_id || referral?.ad_id || null,
+      source_type: referral?.source_type || referral?.type || null,
+      headline: referral?.headline || referral?.source_url || null,
+      ctwa_clid: referral?.ctwa_clid || null,
+      ad_referral_raw: referral || null
+    };
+
+    // Insert con on_conflict: si el telefono ya existe, NO sobrescribe (first-touch)
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/atribucion?on_conflict=telefono`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': process.env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
+          'Prefer': 'resolution=ignore-duplicates,return=minimal'
+        },
+        body: JSON.stringify(registro)
+      }
+    );
+
+    if (referral && tieneAd) {
+      console.log(`🎯 Atribución capturada [${canal}] ${userId}: AD source_id=${registro.source_id}`);
+    } else {
+      console.log(`🌱 Atribución [${canal}] ${userId}: orgánico`);
+    }
+  } catch (e) {
+    console.error('Error guardando atribución:', e);
+  }
+}
+
 // ========== FUNCIÓN: PROCESAR MENSAJE ==========
-async function procesarMensaje(userId, canal, mensajeCliente) {
+async function procesarMensaje(userId, canal, mensajeCliente, referral = null) {
   console.log(`📩 [${canal}] Mensaje de ${userId}: ${mensajeCliente}`);
+
+  // Capturar atribución (solo registra el primer toque por UNIQUE telefono)
+  await guardarAtribucion(userId, canal, referral);
 
   const previousResponseId = await obtenerMemoria(userId);
   if (previousResponseId) {
@@ -606,8 +653,10 @@ export default async function handler(req, res) {
           const message = messages[0];
           const from = message.from;
           const messageBody = message.text?.body || '';
+          // El referral viene en message.referral (click-to-WhatsApp ads)
+          const referral = message.referral || null;
           if (messageBody) {
-            await procesarMensaje(from, 'whatsapp', messageBody);
+            await procesarMensaje(from, 'whatsapp', messageBody, referral);
           }
         }
       }
@@ -621,7 +670,9 @@ export default async function handler(req, res) {
             if (event.message && event.message.text && !event.message.is_echo) {
               const senderId = event.sender.id;
               const text = event.message.text;
-              await procesarMensaje(senderId, 'messenger', text);
+              // Referral en Messenger: event.message.referral o event.referral o event.postback.referral
+              const referral = event.message?.referral || event.referral || event.postback?.referral || null;
+              await procesarMensaje(senderId, 'messenger', text, referral);
             }
           }
         }
@@ -636,7 +687,8 @@ export default async function handler(req, res) {
             if (event.message && event.message.text && !event.message.is_echo) {
               const senderId = event.sender.id;
               const text = event.message.text;
-              await procesarMensaje(senderId, 'instagram', text);
+              const referral = event.message?.referral || event.referral || event.postback?.referral || null;
+              await procesarMensaje(senderId, 'instagram', text, referral);
             }
           }
         }
