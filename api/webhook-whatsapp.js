@@ -1,5 +1,5 @@
 // Webhook Multicanal - Alpuerta IA Comercial
-// v4.7 — Captura de atribución (referral de Meta) + extracción robusta OpenAI
+// v4.8 — Diagnóstico de envío Meta (lee respuesta real de WhatsApp/Messenger/Instagram) + extracción robusta OpenAI
 import fetch from 'node-fetch';
 
 const SYSTEM_PROMPT = `Eres el asesor comercial digital de Alpuerta Premiaciones, marca premium de premiaciones personalizadas y de alto impacto.
@@ -507,7 +507,7 @@ async function guardarConversacion(userId, canal, mensajeCliente, respuestaIA, r
 
 // ========== FUNCIÓN: ENVIAR MENSAJE A WHATSAPP ==========
 async function enviarWhatsApp(to, text) {
-  await fetch(`https://graph.facebook.com/v25.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
+  const r = await fetch(`https://graph.facebook.com/v25.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -519,11 +519,17 @@ async function enviarWhatsApp(to, text) {
       text: { body: text }
     })
   });
+  const data = await r.json();
+  if (!r.ok || data.error) {
+    console.error('❌ ENVÍO WHATSAPP FALLÓ:', r.status, JSON.stringify(data));
+  } else {
+    console.log('📤 WhatsApp OK:', JSON.stringify(data));
+  }
 }
 
 // ========== FUNCIÓN: ENVIAR MENSAJE A MESSENGER ==========
 async function enviarMessenger(recipientId, text) {
-  await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
+  const r = await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -531,11 +537,17 @@ async function enviarMessenger(recipientId, text) {
       message: { text: text }
     })
   });
+  const data = await r.json();
+  if (!r.ok || data.error) {
+    console.error('❌ ENVÍO MESSENGER FALLÓ:', r.status, JSON.stringify(data));
+  } else {
+    console.log('📤 Messenger OK:', JSON.stringify(data));
+  }
 }
 
 // ========== FUNCIÓN: ENVIAR MENSAJE A INSTAGRAM ==========
 async function enviarInstagram(recipientId, text) {
-  await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
+  const r = await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -543,6 +555,12 @@ async function enviarInstagram(recipientId, text) {
       message: { text: text }
     })
   });
+  const data = await r.json();
+  if (!r.ok || data.error) {
+    console.error('❌ ENVÍO INSTAGRAM FALLÓ:', r.status, JSON.stringify(data));
+  } else {
+    console.log('📤 Instagram OK:', JSON.stringify(data));
+  }
 }
 
 // ========== FUNCIÓN: GUARDAR ATRIBUCIÓN (ORIGEN DEL LEAD) ==========
