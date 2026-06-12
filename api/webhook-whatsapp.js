@@ -1,5 +1,5 @@
 // Webhook Multicanal - Alpuerta IA Comercial
-// v4.8 — Diagnóstico de envío Meta (lee respuesta real de WhatsApp/Messenger/Instagram) + extracción robusta OpenAI
+// v4.9 — Envío Messenger/Instagram usa PAGE_ID explícito (no 'me') + diagnóstico de envío Meta + extracción robusta OpenAI
 import fetch from 'node-fetch';
 
 const SYSTEM_PROMPT = `Eres el asesor comercial digital de Alpuerta Premiaciones, marca premium de premiaciones personalizadas y de alto impacto.
@@ -529,7 +529,8 @@ async function enviarWhatsApp(to, text) {
 
 // ========== FUNCIÓN: ENVIAR MENSAJE A MESSENGER ==========
 async function enviarMessenger(recipientId, text) {
-  const r = await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
+  const pageId = process.env.FB_PAGE_ID;
+  const r = await fetch(`https://graph.facebook.com/v25.0/${pageId}/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -547,7 +548,8 @@ async function enviarMessenger(recipientId, text) {
 
 // ========== FUNCIÓN: ENVIAR MENSAJE A INSTAGRAM ==========
 async function enviarInstagram(recipientId, text) {
-  const r = await fetch(`https://graph.facebook.com/v25.0/me/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
+  const pageId = process.env.FB_PAGE_ID;
+  const r = await fetch(`https://graph.facebook.com/v25.0/${pageId}/messages?access_token=${process.env.META_PAGE_ACCESS_TOKEN}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
