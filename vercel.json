@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/extraer-gasto",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/sync-ventas",
+      "schedule": "30 12 * * *"
+    }
+  ]
+}
