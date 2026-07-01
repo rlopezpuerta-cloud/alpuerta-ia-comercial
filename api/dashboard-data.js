@@ -44,17 +44,14 @@ export default async function handler(req, res) {
       `ventas?periodo=eq.${periodo}&select=monto_mxn,origen,canal`, supaKey
     );
     const leadsTotal = await supaQuery(
-      `atribucion?select=telefono`, supaKey
+      `leads_kommo?periodo=eq.${periodo}&select=kommo_lead_id`, supaKey
     );
 
     const totalInversion = gastoTotal.reduce((s, r) => s + Number(r.gasto_mxn || 0), 0);
     const totalVentas = ventasTotal.length;
     const totalIngresos = ventasTotal.reduce((s, r) => s + Number(r.monto_mxn || 0), 0);
-    // Leads del periodo: contar atribucion de ese mes
-    const leadsPeriodo = await supaQuery(
-      `atribucion?created_at=gte.${periodo}-01&select=telefono`, supaKey
-    );
-    const totalLeads = leadsPeriodo.length;
+    // Leads del periodo: contar leads_kommo de ese mes (conteo real desde Kommo)
+    const totalLeads = leadsTotal.length;
 
     // Cuántas ventas tienen origen identificado
     const ventasConOrigen = ventasTotal.filter(v => v.canal).length;
