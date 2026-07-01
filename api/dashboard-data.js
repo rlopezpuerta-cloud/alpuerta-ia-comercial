@@ -12,6 +12,23 @@ async function supaQuery(path, key) {
   return res.json();
 }
 
+// Conteo exacto sin traer las filas (evita el tope de 1000 de PostgREST).
+// Lee el total del header Content-Range: "0-0/<total>".
+async function supaCount(path, key) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      'apikey': key,
+      'Authorization': `Bearer ${key}`,
+      'Prefer': 'count=exact',
+      'Range': '0-0'
+    }
+  });
+  if (!res.ok && res.status !== 206) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+  const cr = res.headers.get('content-range') || '';
+  const total = parseInt(cr.split('/')[1], 10);
+  return isNaN(total) ? 0 : total;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -43,15 +60,15 @@ export default async function handler(req, res) {
     const ventasTotal = await supaQuery(
       `ventas?periodo=eq.${periodo}&select=monto_mxn,origen,canal`, supaKey
     );
-    const leadsTotal = await supaQuery(
+    const totalLeadsCount = await supaCount(
       `leads_kommo?periodo=eq.${periodo}&select=kommo_lead_id`, supaKey
     );
 
     const totalInversion = gastoTotal.reduce((s, r) => s + Number(r.gasto_mxn || 0), 0);
     const totalVentas = ventasTotal.length;
     const totalIngresos = ventasTotal.reduce((s, r) => s + Number(r.monto_mxn || 0), 0);
-    // Leads del periodo: contar leads_kommo de ese mes (conteo real desde Kommo)
-    const totalLeads = leadsTotal.length;
+    // Leads del periodo: conteo exacto de leads_kommo de ese mes
+    const totalLeads = totalLeadsCount;
 
     // Cuántas ventas tienen origen identificado
     const ventasConOrigen = ventasTotal.filter(v => v.canal).length;
