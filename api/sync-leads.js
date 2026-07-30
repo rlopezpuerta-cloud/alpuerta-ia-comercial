@@ -12,15 +12,32 @@
 //   teléfono), así que corre en <1s con cualquier volumen y no revienta el
 //   límite de tiempo de Vercel Hobby.
 //
-//   CANAL: los leads de Kommo hoy no traen tracking (custom_fields_values=null),
-//   así que canal queda null. El código ya deriva el canal si algún día se
-//   captura el origen (fbclid/utm/ttad). El desglose POR CANAL necesita ese
-//   proyecto de captura aparte.
+//   CANAL (actualizado 30-jul-2026): desde hoy los leads SÍ traen canal, en el
+//   campo "Canal de origen" (id 1390045) que rellenan los escenarios de Make a
+//   partir de la conversación de Kommo (/v4/talks). Se lee ese campo.
+//
+//   OJO CON LO QUE SIGNIFICA: es el canal por el que ENTRÓ LA CONVERSACIÓN
+//   (WhatsApp, Messenger, Instagram, formulario web), NO prueba de que el lead
+//   venga de un anuncio. Un lead orgánico de WhatsApp y uno que llegó por un
+//   anuncio de WhatsApp se ven igual. Por eso el costo por lead que salga de
+//   cruzar esto con gasto_ads es una COTA SUPERIOR OPTIMISTA: el denominador
+//   incluye tráfico que no se pagó. Para atribución real por anuncio hace falta
+//   capturar click ids (fbclid/gclid) o migrar a WhatsApp Cloud API.
 
 const KOMMO_DOMAIN = 'https://ventastrofeosonlinecommx.kommo.com';
 const PIPELINE_ID = 13854004;
 const SUPABASE_URL = 'https://rwujdgfgvbolrugrsjib.supabase.co';
 const MESES_ATRAS = 3; // rango hacia atrás a sincronizar
+
+// Campo Kommo "Canal de origen" y sus opciones.
+const CANAL_FIELD_ID = 1390045;
+const CANAL_POR_ENUM = {
+  937393: 'whatsapp',
+  937395: 'messenger',
+  937397: 'instagram',
+  937399: 'web',
+  937401: 'otro'
+};
 
 async function kommoGet(path, token) {
   const res = await fetch(`${KOMMO_DOMAIN}${path}`, {
@@ -31,8 +48,12 @@ async function kommoGet(path, token) {
   return res.json();
 }
 
-// Deriva canal desde los campos de tracking del lead (hoy vienen vacíos,
-// queda listo para cuando exista captura de origen).
+// Deriva canal del lead. Dos niveles, del más fiable al menos:
+//   1) Click ids de publicidad (fbclid/gclid/ttad/utm). Si existen, son prueba
+//      real de que el lead viene de un anuncio. Hoy vienen vacíos, pero se
+//      conservan porque son la atribución buena si algún día se capturan.
+//   2) Campo "Canal de origen" (1390045). Dice por dónde entró la conversación,
+//      no si vino de un anuncio. Es lo que hay, y es mucho mejor que nada.
 function derivarCanal(lead) {
   const cfs = lead.custom_fields_values || [];
   const val = (code) => {
@@ -44,11 +65,21 @@ function derivarCanal(lead) {
   const gclid = val('GCLID');
   const utmSource = (val('UTM_SOURCE') || '').toLowerCase();
 
+  // Nivel 1: atribución publicitaria comprobada.
   if (ttad) return { canal: 'tiktok_ads', origen: 'ad' };
   if (gclid) return { canal: 'google_ads', origen: 'ad' };
   if (utmSource.includes('ig') || utmSource.includes('insta')) return { canal: 'ig_ads', origen: 'ad' };
   if (fbclid) return { canal: 'fb_ads', origen: 'ad' };
   if (utmSource.includes('whats')) return { canal: 'whatsapp_ads', origen: 'ad' };
+
+  // Nivel 2: canal de conversación (no implica anuncio).
+  const campoCanal = cfs.find(x => x.field_id === CANAL_FIELD_ID);
+  const enumId = campoCanal?.values?.[0]?.enum_id;
+  const canal = enumId ? CANAL_POR_ENUM[enumId] : null;
+  if (canal) {
+    return { canal, origen: canal === 'web' ? 'formulario' : 'chat' };
+  }
+
   return { canal: null, origen: 'desconocido' };
 }
 
