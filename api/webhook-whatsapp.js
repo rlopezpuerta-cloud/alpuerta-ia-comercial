@@ -362,7 +362,23 @@ Contacto:
 - Email: [email]
 ━━━━━━━━━━━━━━━━━━━━
 
-Voy a preparar tu cotización en este momento. En breve te llega aquí mismo."
+Un asesor de nuestro equipo te escribirá por WhatsApp desde nuestro número principal (55 4611 0107) con tu cotización.
+[RELEVO]"
+
+══════════════════════════════════════════════════
+PASO A UNA PERSONA
+══════════════════════════════════════════════════
+
+Pasa la conversación a un asesor cuando:
+- Ya generaste el RESUMEN DE TU PROYECTO (cierre normal).
+- El cliente pide explícitamente hablar con una persona, un asesor, un vendedor, o que le llamen.
+- El cliente pregunta por un pedido que ya tiene, una factura, un pago, una queja o algo que no puedes resolver con esta guía.
+
+En esos casos responde breve y cálido, por ejemplo:
+"Claro, le paso tu conversación a un asesor. Te escribirá por WhatsApp desde nuestro número principal (55 4611 0107)."
+y termina tu mensaje con la etiqueta [RELEVO] sola en la última línea.
+
+NUNCA escribas [RELEVO] en ningún otro caso.
 
 SI EL CLIENTE PREGUNTA POR PRECIO ANTES DE TERMINAR LA RECOLECCIÓN:
 "Para darte un precio correcto necesito terminar de capturar los detalles. Con eso te preparo la cotización exacta sin estimaciones."
@@ -487,7 +503,7 @@ async function llamarOpenAI(messageBody, previousResponseId) {
 }
 
 // ========== FUNCIÓN: GUARDAR EN SUPABASE ==========
-async function guardarConversacion(userId, canal, mensajeCliente, respuestaIA, responseId) {
+async function guardarConversacion(userId, canal, mensajeCliente, respuestaIA, responseId, intencion = null) {
   await fetch(`${supabaseUrl}/rest/v1/conversaciones`, {
     method: 'POST',
     headers: {
@@ -500,7 +516,8 @@ async function guardarConversacion(userId, canal, mensajeCliente, respuestaIA, r
       canal: canal,
       mensaje_cliente: mensajeCliente,
       respuesta_ia: respuestaIA,
-      openai_response_id: responseId
+      openai_response_id: responseId,
+      intencion: intencion
     })
   });
 }
@@ -611,6 +628,156 @@ async function guardarAtribucion(userId, canal, referral) {
   }
 }
 
+// ========== RELEVO A UNA PERSONA ==========
+// Cuando el agente cierra con el resumen o el cliente pide a una persona, el
+// agente escribe [RELEVO]. Se guarda la fila con intencion='relevo', se avisa a
+// Make (lead en Kommo + Slack) y el agente deja de contestar a ese teléfono
+// durante DIAS_RELEVO; lo que el cliente siga escribiendo se reenvía a Slack.
+const ETIQUETA_RELEVO = '[RELEVO]';
+const DIAS_RELEVO = 7;
+const KOMMO_PIPELINE = 13854004;
+const KOMMO_CALIFICANDO = 106902764;
+const KOMMO_CALIFICADO = 106902768;
+
+function supabaseHeaders() {
+  return {
+    'apikey': process.env.SUPABASE_SERVICE_KEY,
+    'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`
+  };
+}
+
+async function relevoActivo(userId) {
+  const desde = new Date(Date.now() - DIAS_RELEVO * 86400000).toISOString();
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/conversaciones?telefono=eq.${userId}&intencion=eq.relevo&created_at=gte.${desde}&select=id&limit=1`,
+      { headers: supabaseHeaders() }
+    );
+    const data = await res.json();
+    return Array.isArray(data) && data.length > 0;
+  } catch (e) {
+    console.error('Error revisando relevo:', e);
+    return false;
+  }
+}
+
+async function leerHistorial(userId) {
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/conversaciones?telefono=eq.${userId}&order=created_at.desc&limit=12&select=mensaje_cliente,respuesta_ia`,
+      { headers: supabaseHeaders() }
+    );
+    const data = await res.json();
+    return Array.isArray(data) ? data.reverse() : [];
+  } catch (e) {
+    console.error('Error leyendo historial:', e);
+    return [];
+  }
+}
+
+async function leerAtribucion(userId) {
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/atribucion?telefono=eq.${userId}&select=origen,ad_name,campaign_name,headline,source_id&limit=1`,
+      { headers: supabaseHeaders() }
+    );
+    const data = await res.json();
+    return Array.isArray(data) && data[0] ? data[0] : null;
+  } catch (e) {
+    console.error('Error leyendo atribución:', e);
+    return null;
+  }
+}
+
+async function avisarMake(payload) {
+  const url = process.env.MAKE_RELEVO_WEBHOOK_URL;
+  if (!url) {
+    console.error('❌ RELEVO SIN AVISO: falta MAKE_RELEVO_WEBHOOK_URL en Vercel', JSON.stringify(payload).slice(0, 500));
+    return false;
+  }
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) {
+      console.error(`❌ RELEVO: Make respondió ${r.status}`);
+      return false;
+    }
+    console.log(`📣 Relevo avisado a Make (${payload.tipo})`);
+    return true;
+  } catch (e) {
+    console.error('❌ RELEVO: error llamando a Make:', e);
+    return false;
+  }
+}
+
+function describirOrigen(atrib) {
+  if (!atrib || atrib.origen !== 'ad') return 'orgánico (sin anuncio)';
+  const partes = [atrib.ad_name, atrib.campaign_name, atrib.headline].filter(Boolean);
+  return `anuncio ${partes.length ? partes.join(' · ') : `(id ${atrib.source_id || 's/d'})`}`;
+}
+
+async function hacerRelevo(userId, respuestaCliente) {
+  const esResumen = respuestaCliente.includes('RESUMEN DE TU PROYECTO');
+  const historial = await leerHistorial(userId);
+  const atrib = await leerAtribucion(userId);
+  const origen = describirOrigen(atrib);
+
+  // «Nombre:» sale dos veces en el resumen (evento y contacto); el de contacto es el último.
+  const nombres = [...respuestaCliente.matchAll(/Nombre:\s*(.+)/g)].map(m => m[1].trim());
+  const nombre = nombres.length ? nombres[nombres.length - 1] : '';
+
+  const conversacion = historial
+    .map(h => `Cliente: ${h.mensaje_cliente || ''}${h.respuesta_ia ? `\nAgente: ${h.respuesta_ia}` : ''}`)
+    .join('\n\n')
+    .slice(-3500);
+
+  const detalle = `RELEVO DESDE WHATSAPP DE ANUNCIOS (+52 81 3678 2679)\nTeléfono: +${userId}\nOrigen: ${origen}\nMotivo: ${esResumen ? 'resumen completo' : 'pidió hablar con una persona'}\n\n${conversacion}`;
+
+  const kommoLead = [{
+    name: `WA Anuncios · ${nombre || '+' + userId}`,
+    pipeline_id: KOMMO_PIPELINE,
+    status_id: esResumen ? KOMMO_CALIFICADO : KOMMO_CALIFICANDO,
+    custom_fields_values: [
+      { field_id: 1389037, values: [{ value: detalle }] },
+      { field_id: 1390045, values: [{ enum_id: 937393 }] }
+    ],
+    _embedded: {
+      tags: [{ name: 'WA-API-Anuncios' }],
+      contacts: [{
+        first_name: nombre || `WhatsApp +${userId}`,
+        custom_fields_values: [{ field_code: 'PHONE', values: [{ value: `+${userId}`, enum_code: 'WORK' }] }]
+      }]
+    }
+  }];
+
+  const slackText =
+    `🟢 *Cliente del WhatsApp de anuncios pide asesor*\n` +
+    `*Cliente:* ${nombre || 'sin nombre'} · <https://wa.me/${userId}|+${userId}>\n` +
+    `*Motivo:* ${esResumen ? 'ya dio todos los datos (resumen completo)' : 'pidió hablar con una persona'}\n` +
+    `*Origen:* ${origen}\n` +
+    `*Qué hacer:* escríbele desde el WhatsApp principal (55 4611 0107). El agente ya no le contestará en el número de anuncios por ${DIAS_RELEVO} días.\n\n` +
+    `*Conversación:*\n${conversacion.slice(-2500)}`;
+
+  await avisarMake({
+    tipo: 'relevo',
+    telefono: userId,
+    slack_text: slackText,
+    kommo_body: JSON.stringify(kommoLead)
+  });
+}
+
+async function reenviarMensajeEnRelevo(userId, mensajeCliente) {
+  await guardarConversacion(userId, 'whatsapp', mensajeCliente, null, null, 'relevo_seguimiento');
+  await avisarMake({
+    tipo: 'mensaje',
+    telefono: userId,
+    slack_text: `💬 *Cliente en relevo sigue escribiendo* en el WhatsApp de anuncios · <https://wa.me/${userId}|+${userId}>\n> ${mensajeCliente.replace(/\n/g, '\n> ')}`
+  });
+}
+
 // ========== FUNCIÓN: PROCESAR MENSAJE ==========
 async function procesarMensaje(userId, canal, mensajeCliente, referral = null) {
   console.log(`📩 [${canal}] Mensaje de ${userId}: ${mensajeCliente}`);
@@ -618,15 +785,31 @@ async function procesarMensaje(userId, canal, mensajeCliente, referral = null) {
   // Capturar atribución (solo registra el primer toque por UNIQUE telefono)
   await guardarAtribucion(userId, canal, referral);
 
+  // Si ya se pasó a una persona, el agente calla y reenvía el mensaje.
+  if (canal === 'whatsapp' && await relevoActivo(userId)) {
+    console.log(`🤝 ${userId} está en relevo: no contesta el agente`);
+    await reenviarMensajeEnRelevo(userId, mensajeCliente);
+    return;
+  }
+
   const previousResponseId = await obtenerMemoria(userId);
   if (previousResponseId) {
     console.log(`🧠 Memoria activa: ${previousResponseId}`);
   }
 
-  const { text: respuestaIA, responseId } = await llamarOpenAI(mensajeCliente, previousResponseId);
-  console.log(`🤖 Respuesta IA: ${respuestaIA}`);
+  const { text: textoIA, responseId } = await llamarOpenAI(mensajeCliente, previousResponseId);
+  // Sin la URL de Make nadie se enteraría del relevo: el agente sigue contestando.
+  const esRelevo = canal === 'whatsapp' && !!process.env.MAKE_RELEVO_WEBHOOK_URL &&
+    (textoIA.includes(ETIQUETA_RELEVO) || textoIA.includes('RESUMEN DE TU PROYECTO'));
+  if (!process.env.MAKE_RELEVO_WEBHOOK_URL && textoIA.includes(ETIQUETA_RELEVO)) {
+    console.error('❌ RELEVO SIN AVISO: falta MAKE_RELEVO_WEBHOOK_URL en Vercel; el agente sigue contestando');
+  }
+  const respuestaIA = textoIA.split(ETIQUETA_RELEVO).join('').trim();
+  console.log(`🤖 Respuesta IA: ${respuestaIA}${esRelevo ? ' [RELEVO]' : ''}`);
 
-  await guardarConversacion(userId, canal, mensajeCliente, respuestaIA, responseId);
+  // La fila con intencion='relevo' se escribe ANTES de avisar: si Meta reintenta
+  // el webhook, relevoActivo() ya la ve y no se duplica el aviso.
+  await guardarConversacion(userId, canal, mensajeCliente, respuestaIA, responseId, esRelevo ? 'relevo' : null);
   console.log('💾 Conversación guardada');
 
   if (canal === 'whatsapp') {
@@ -638,6 +821,11 @@ async function procesarMensaje(userId, canal, mensajeCliente, referral = null) {
   }
 
   console.log(`✅ Respuesta enviada por ${canal} a ${userId}`);
+
+  // Primero le llega la respuesta al cliente; después se avisa al equipo.
+  if (esRelevo) {
+    await hacerRelevo(userId, respuestaIA);
+  }
 }
 
 // ========== HANDLER PRINCIPAL ==========
