@@ -668,6 +668,16 @@ export default async function handler(req, res) {
         return res.status(200).send('EVENT_RECEIVED');
       }
 
+      // Messenger e Instagram los atiende el bot de Kommo; aquí solo WhatsApp.
+      // Sin esto, cada mensaje de la página generaría una respuesta que no se puede
+      // enviar (pages_messaging sin aprobar) y se guardaría en `conversaciones`.
+      // Para volver a atenderlos: ATENDER_MESSENGER_IG=true en Vercel.
+      const atenderMessengerIG = process.env.ATENDER_MESSENGER_IG === 'true';
+      if (!atenderMessengerIG && body.object !== 'whatsapp_business_account') {
+        console.log(`⏭️ Evento ${body.object} ignorado (solo WhatsApp).`);
+        return res.status(200).send('EVENT_RECEIVED');
+      }
+
       // ===== WHATSAPP =====
       if (body.object === 'whatsapp_business_account') {
         const messages = body.entry?.[0]?.changes?.[0]?.value?.messages;
